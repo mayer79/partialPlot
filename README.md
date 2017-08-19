@@ -2,7 +2,16 @@
 Partial dependency (effects) plots for xgboost objects
 
 ## Idea
-The R function `partialPlot` is used to visualize partial dependency of a variable on the response. It is inspired by the analogous function in the `randomForest` package.
+The R function `partialPlot` is used to visualize partial dependency of a variable on the response. It is inspired by the analogous function in the `randomForest` package. It works as long as the objective is one of "reg:linear", "reg:logistic", "binary:logistic" or "multi:softprob".
+
+The main arguments of `partialPlot` are as follows
+1. `obj`: xgboost regression model
+2. `pred.data`: Matrix to be used in prediction (no `xgb.DMatrix`)
+3. `xname`: Name of column in `pred.data` according to that dependency plot is calculated
+4. `n.pt`: Evaluation grid size (used only if `x` is not discrete)
+5. `x.discrete`: If TRUE, the evaluation grid is set to the unique values of `x`
+6. `subsample`: Fraction of lines in `pred.data` to be used in prediction
+7. `which.class`: Which class if objective is "multi:softprob" (value from 0 to num_class - 1)
 
 ## The function
 Check R/partialPlot.R for parameters etc.
@@ -78,7 +87,7 @@ fit_multi <- xgb.train(dtrain, params = param, nrounds = 100)
 
 par(mfrow = c(2, 2))
 for (nam in colnames(dat)) {
-  partialPlot(fit, dat, xname = nam, xlab = "", main = nam, which.class = 1)
+  partialPlot(fit, dat, xname = nam, xlab = "", main = nam, which.class = 0)
 }
 ```
 The effects on species "setosa" (first class, corresponding to level 0) are as follows:
