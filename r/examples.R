@@ -2,8 +2,10 @@
 # Regression (realistic example based on diamonds data set)
 #==============================================================
 
-library(ggplot2)
-head(diamonds)
+library(ggplot2) # for data set "diamonds"
+library(xgboost)
+source("R/partialPlot.R") # or your path
+
 
 # Prepare data set for modelling
 diamonds <- transform(as.data.frame(diamonds),
@@ -60,5 +62,5 @@ fit_multi <- xgb.train(dtrain, params = param, nrounds = 100)
 
 par(mfrow = c(2, 2))
 for (nam in colnames(dat)) {
-  partialPlot(fit, dat, xname = nam, xlab = "", main = nam, which.class = 1)
+  partialPlot(fit_multi, dat, xname = nam, xlab = "", main = nam, which.class = 1)
 }
