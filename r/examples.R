@@ -52,6 +52,9 @@ partialPlot(fit_gbm, x.train, xname = "table", subsample = 0.01)
 # Multiclass prediction (toy example based on iris data set)
 #==============================================================
 
+library(xgboost)
+source("R/partialPlot.R") # or your path
+
 dat <- as.matrix(iris[, 1:4])
 dtrain <- xgb.DMatrix(dat, label = as.numeric(iris$Species) - 1)
 
@@ -62,5 +65,5 @@ fit_multi <- xgb.train(dtrain, params = param, nrounds = 100)
 
 par(mfrow = c(2, 2))
 for (nam in colnames(dat)) {
-  partialPlot(fit_multi, dat, xname = nam, xlab = "", main = nam, which.class = 1)
+  partialPlot(fit_multi, dat, xname = nam, xlab = "", main = nam, which.class = 0)
 }

@@ -46,7 +46,7 @@ partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE, su
     pred.data[, xname] <- x[i]
     
     if (!is.null(which.class)) {
-      preds <- predict(obj, pred.data, reshape = TRUE)[, which.class, drop = FALSE]  
+      preds <- predict(obj, pred.data, reshape = TRUE)[, which.class + 1, drop = FALSE]  
     } else {
       preds <- predict(obj, pred.data) 
     }
