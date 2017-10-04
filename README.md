@@ -92,7 +92,7 @@ r2(train$y, predict(fit_xgb, train$X)) # 0.9927861
 r2(test$y, predict(fit_xgb, test$X)) # 0.9912827
 
 partialDiamondsPlot(fit_xgb)
-
+```
 
 ![Diamonds plot](/pics/diamonds.jpeg)
 
@@ -115,7 +115,7 @@ par(mfrow = c(2, 2))
 for (nam in colnames(train$X)) {
   partialPlot(fit_xgb, train$X, xname = nam, xlab = "", which.class = 0)
 }
-
 ```
+
 The effects on species "setosa" (first class, corresponding to level 0) are as follows:
 ![iris plot](/pics/iris.jpeg)
