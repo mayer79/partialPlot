@@ -1,5 +1,5 @@
 #======================================================================
-# Examples for partialPlot
+# Regression Examples for "partialPlot"
 #======================================================================
 
 library(ggplot2) # for data set "diamonds"
@@ -48,7 +48,7 @@ partialDiamondsPlot <- function(fit) {
   par(mfrow = 3:2,
       oma = c(0, 0, 0, 0) + 0.3,
       mar = c(4, 2, 0, 0) + 0.1,
-      mgp=c(2, 0.5, 0.5))
+      mgp = c(2, 0.5, 0.5))
   
   partialPlot(fit, train$X, xname = "log_carat")
   partialPlot(fit, train$X, xname = "cut", discrete.x = TRUE)
@@ -66,14 +66,18 @@ dtrain <- xgb.DMatrix(train$X, label = train$y)
 dtest <- xgb.DMatrix(test$X, label = test$y)
 watchlist <- list(train = dtrain, test = dtest)
 
-param <- list(max_depth = 8, learning_rate = 0.01, nthread = 2, lambda = 0.2, 
-              objective = "reg:linear", eval_metric = "rmse", subsample = 0.7,
-              monotone_constraints = c(1, 1, 0, 1, 0, 0))
+param <- list(max_depth = 8, 
+              learning_rate = 0.01, 
+              nthread = 2, 
+              lambda = 0.2, 
+              objective = "reg:linear", 
+              eval_metric = "rmse", 
+              subsample = 0.7)
 
 fit_xgb <- xgb.train(param, dtrain, watchlist = watchlist, 
                      nrounds = 850, early_stopping_rounds = 5)
-r2(train$y, predict(fit_xgb, train$X)) # 0.9907
-r2(test$y, predict(fit_xgb, test$X)) # 0.9901
+r2(train$y, predict(fit_xgb, train$X)) # 0.9927861
+r2(test$y, predict(fit_xgb, test$X)) # 0.9912827
 
 partialDiamondsPlot(fit_xgb)
 
@@ -87,14 +91,17 @@ dtest <- lgb.Dataset(test$X, label = test$y)
 
 params <- list(objective = "regression", 
                metric = "l2",
-               learning_rate = 0.1,
-               min_data = 20)
+               learning_rate = 0.01,
+               num_leaves = 63,
+               min_data_in_leaf = 20,
+               bagging_fraction = 0.7,
+               bagging_freq = 4)
 
 system.time(fit_lgb <- lgb.train(data = dtrain,
                                  params = params, 
                                  nrounds = 850,
                                  verbose = 0L))
-r2(test$y, predict(fit_lgb, test$X)) # 0.9911452
+r2(test$y, predict(fit_lgb, test$X)) # 0.991109
 
 partialDiamondsPlot(fit_lgb)
 
@@ -114,64 +121,4 @@ object.size(fit_ranger) # 300 MB
 
 # Effects plots
 partialDiamondsPlot(fit_ranger)
-
-
-#======================================================================
-# xgboost multiclass prediction (toy example based on iris data set)
-#======================================================================
-
-library(xgboost)
-source("R/partialPlot.R") # or your path
-
-dat <- as.matrix(iris[, 1:4])
-dtrain <- xgb.DMatrix(dat, label = as.numeric(iris$Species) - 1)
-
-param <- list(max_depth = 2, learning_rate = 0.1, objective = "multi:softprob", 
-              num_class = 3, eval_metric = "merror")
-
-fit_multi <- xgb.train(dtrain, params = param, nrounds = 100)
-
-par(mfrow = c(2, 2))
-for (nam in colnames(dat)) {
-  partialPlot(fit_multi, dat, xname = nam, xlab = "", main = nam, which.class = 0)
-}
-
-
-#======================================================================
-# ranger rf regression (realistic example based on diamonds data set)
-#======================================================================
-library(ranger)
-source("R/partialPlot.R") # or your path
-
-fit_ranger <- ranger(log_price ~ log_carat + cut + color + clarity + depth + table, data = train,
-                     importance = "impurity", num.trees = 500, always.split.variables = "log_carat", seed = 837363) 
-fit_ranger # Estimated R2 0.9887582 
-r2(test$log_price, predict(fit_ranger, test)$predictions) # 0.9889626
-plot(importance(fit_ranger))
-object.size(fit_ranger) # 300 MB
-
-# Effects plots
-par(mfrow = 3:2)
-
-partialPlot(fit_ranger, train, xname = "log_carat", subsample = 0.01)
-partialPlot(fit_ranger, train, xname = "cut", discrete.x = TRUE, subsample = 0.01)
-partialPlot(fit_ranger, train, xname = "color", discrete.x = TRUE, subsample = 0.01)
-partialPlot(fit_ranger, train, xname = "clarity", discrete.x = TRUE, subsample = 0.01)
-partialPlot(fit_ranger, train, xname = "depth", subsample = 0.01)
-partialPlot(fit_ranger, train, xname = "table", subsample = 0.01)
-
-
-#======================================================================
-# ranger multiclass prediction (toy example based on iris data set)
-#======================================================================
-
-library(ranger)
-source("R/partialPlot.R") # or your path
-
-fit_ranger <- ranger(Species ~ ., data = iris, probability = TRUE)
-
-par(mfrow = c(2, 2))
-for (nam in colnames(iris)[1:4]) {
-  partialPlot(fit_ranger, iris, xname = nam, xlab = "", main = nam, which.class = "setosa")
-}
 
