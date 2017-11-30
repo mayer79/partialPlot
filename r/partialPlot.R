@@ -36,7 +36,6 @@ partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE,
     n <- nrow(pred.data)
     picked <- sample(n, trunc(subsample * n))
     pred.data <- pred.data[picked, , drop = FALSE]
-    
   }
   xv <- pred.data[, xname]
   
@@ -48,10 +47,11 @@ partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE,
   y <- numeric(length(x))
   
   isRanger <- inherits(obj, "ranger")
-  
+  isLm <- inherits(obj, "lm") | inherits(obj, "lmrob") | inherits(obj, "lmerMod")
+
   for (i in seq_along(x)) {
-    pred.data[, xname] <- x[i]
-  
+   pred.data[, xname] <- x[i]
+
     if (isRanger) {
       if (!is.null(which.class)) {
         if (obj$treetype != "Probability estimation") {
@@ -62,6 +62,8 @@ partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE,
       else {
         preds <- predict(obj, pred.data)$predictions
       }
+    } else if (isLm) {
+      preds <- predict(obj, pred.data) 
     } else {
       if (!is.null(which.class)) {
         preds <- predict(obj, pred.data, reshape = TRUE)[, which.class + 1] 
@@ -74,4 +76,29 @@ partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE,
   }
   
   plot(x, y, xlab = xlab, ylab = ylab, main = main, type = type, ...)
+  data.frame(x = x, y = y)
+}
+
+h2o.partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE, 
+                            subsample = pmin(1, n.pt * 100 / h2o.nrow(pred.data))) {
+  if (subsample < 1) {
+    pred.data <- h2o.splitFrame(pred.data, ratios = subsample)[[1]]
+  }
+  
+  xv <- pred.data[, xname]
+  
+  if (discrete.x) {
+    x <- h2o.unique(xv)
+  } else {
+    x <- h2o.quantile(xv, seq(0.03, 0.97, length.out = n.pt))
+  }
+  
+  y <- numeric(h2o.nrow(x))
+  xout <- as.data.frame(x)[, 1]
+    
+  for (i in seq_along(xout)) {
+    pred.data[, xname] <- h2o.rep_len(x[i], h2o.nrow(pred.data))
+    y[i] <- mean(as.data.frame(predict(obj, pred.data))$predict)
+  }
+  data.frame(x = xout, y = y)
 }
