@@ -90,7 +90,7 @@ h2o.partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE
   if (discrete.x) {
     x <- h2o.unique(xv)
   } else {
-    x <- h2o.quantile(xv, seq(0.03, 0.97, length.out = n.pt))
+    x <- as.h2o(quantile(xv, seq(0.03, 0.97, length.out = n.pt)))
   }
   
   y <- numeric(h2o.nrow(x))
@@ -134,7 +134,7 @@ partialPlot2 <- function(fit, data, x_names, x_gridsize = c(19, 5), x_discrete =
   out
 }
 
-out <- partialPlot2(fit, iris, x_names = c("Sepal.Width", "Petal.Length"))
-out <- partialPlot2(fit, iris, x_names = c("Species", "Sepal.Width"))
-out <- partialPlot2(fit, iris, x_names = "Species")
-out <- partialPlot2(fit, iris, x_names = "Sepal.Width")
+# out <- partialPlot2(fit, iris, x_names = c("Sepal.Width", "Petal.Length"))
+# out <- partialPlot2(fit, iris, x_names = c("Species", "Sepal.Width"))
+# out <- partialPlot2(fit, iris, x_names = "Species")
+# out <- partialPlot2(fit, iris, x_names = "Sepal.Width")
