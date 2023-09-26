@@ -21,12 +21,13 @@
 #' @param which.class Which class if objective is "multi:softprob" (value from 0 to num_class - 1)
 #' @param xlab, ylab, main, type, ... Parameters passed to \code{plot}
 #' @param seed Random seed used if \code{subsample < 1}
+#' @param show_plot Should the result be plotted? Default is `TRUE`.
 
 #' @return List of prepared objects
 partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE, 
                         subsample = pmin(1, n.pt * 100 / nrow(pred.data)), which.class = NULL,
                         xlab = deparse(substitute(xname)), ylab = "", type = if (discrete.x) "p" else "b",
-                        main = "", rug = TRUE, seed = NULL, ...) {
+                        main = "", rug = TRUE, seed = NULL, show_plot = TRUE, ...) {
   stopifnot(dim(pred.data) >= 1)
   
   if (subsample < 1) {
@@ -75,7 +76,9 @@ partialPlot <- function(obj, pred.data, xname, n.pt = 19, discrete.x = FALSE,
     y[i] <- mean(preds)
   }
   
-  plot(x, y, xlab = xlab, ylab = ylab, main = main, type = type, ...)
+  if (show_plot) {
+    plot(x, y, xlab = xlab, ylab = ylab, main = main, type = type, ...) 
+  }
   data.frame(x = x, y = y)
 }
 
